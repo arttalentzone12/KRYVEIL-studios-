@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Log in — Kryveil Studios</title>
+<style>
+  :root{color-scheme:dark;--bg:#050000;--red:#d10b16;--red2:#f32632;--text:#f4eeee;--muted:#c2b8b8;--line:rgba(238,30,42,.48)}
+  *{box-sizing:border-box}
+  body{margin:0;min-height:100vh;min-height:100dvh;display:grid;place-items:center;padding:24px;overflow-x:hidden;color:var(--text);font-family:Georgia,'Times New Roman',serif;
+    background:radial-gradient(ellipse at 50% 115%,rgba(130,0,10,.55),transparent 62%),radial-gradient(ellipse at 50% -10%,rgba(60,0,6,.6),transparent 55%),var(--bg)}
+  #fx,.vignette{position:fixed;inset:0;width:100%;height:100%;pointer-events:none}
+  #fx{z-index:0}
+  .vignette{z-index:1;background:radial-gradient(ellipse at center,transparent 40%,rgba(0,0,0,.8) 100%)}
+  .tilt{position:relative;z-index:2;width:min(420px,100%);transition:transform .15s ease-out;will-change:transform}
+  .card{position:relative;overflow:hidden;padding:34px;border:1px solid var(--line);background:rgba(22,3,6,.66);
+    backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);animation:rise .9s cubic-bezier(.2,.8,.2,1) both,glow 4s ease-in-out infinite}
+  .card::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(260px circle at var(--mx,50%) var(--my,0%),rgba(243,38,50,.16),transparent 65%)}
+  @keyframes rise{from{opacity:0;transform:translateY(26px) scale(.97)}to{opacity:1;transform:none}}
+  @keyframes glow{0%,100%{box-shadow:0 0 28px rgba(209,11,22,.16)}50%{box-shadow:0 0 60px rgba(243,38,50,.32)}}
+  @keyframes flick{0%,90%,100%{opacity:1}92%{opacity:.5}95%{opacity:1}97%{opacity:.7}}
+  .brand{margin:0 0 6px;font-size:22px;letter-spacing:.12em;font-weight:700}
+  .brand span{color:var(--red2);text-shadow:0 0 14px rgba(243,38,50,.7);animation:flick 6s infinite}
+  h1{margin:18px 0 6px;font-size:26px;font-weight:400}
+  .sub{margin:0 0 20px;color:var(--muted);font-size:15px;line-height:1.5}
+  label{display:block;margin:14px 0 6px;font-size:14px;color:#f1d9da}
+  input{width:100%;font:inherit;color:var(--text);background:rgba(10,2,3,.8);border:1px solid var(--line);border-radius:3px;padding:12px 13px;transition:border-color .2s,box-shadow .2s}
+  input:focus{outline:none;border-color:var(--red2);box-shadow:0 0 0 3px rgba(243,38,50,.18),0 0 18px rgba(243,38,50,.25)}
+  .collapse{display:grid;grid-template-rows:0fr;opacity:0;transition:grid-template-rows .4s ease,opacity .4s ease}
+  .collapse.open{grid-template-rows:1fr;opacity:1}
+  .collapse>div{min-height:0;overflow:hidden;padding:2px;margin:-2px}
+  .collapse label{margin-top:0}
+  .submit{position:relative;overflow:hidden;width:100%;margin-top:22px;min-height:48px;padding:12px 24px;font:inherit;color:#fff;background:#b9000a;border:1px solid var(--red);cursor:pointer;transition:background .2s,box-shadow .2s}
+  .submit::after{content:"";position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.25),transparent);transform:skewX(-20deg);transition:left .6s}
+  .submit:hover{background:var(--red);box-shadow:0 0 24px rgba(243,38,50,.5)}
+  .submit:hover::after{left:130%}
+  .submit:focus-visible,.switch button:focus-visible,.back:focus-visible{outline:2px solid var(--red2);outline-offset:2px}
+  .submit:disabled{opacity:.6;cursor:wait}
+  #msg{min-height:22px;margin-top:14px;font-size:14px;line-height:1.4}
+  .err{color:#ff8a8f}.ok{color:#8fe3a8}
+  .switch{margin:14px 0 0;font-size:14px;color:var(--muted)}
+  .switch button{font:inherit;color:var(--red2);background:none;border:0;padding:0;cursor:pointer;text-decoration:underline}
+  .back{display:inline-block;margin-top:20px;font-size:14px;color:var(--muted);text-decoration:none;transition:color .2s}
+  .back:hover{color:var(--text)}
+  @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<canvas id="fx" aria-hidden="true"></canvas>
+<div class="vignette"></div>
+
+<div class="tilt" id="tilt">
+  <main class="card" id="card">
+    <p class="brand">KRYVEIL <span>STUDIOS</span></p>
+    <h1 id="title">Log in</h1>
+    <p class="sub" id="sub">Welcome back. Enter your details to continue.</p>
+
+    <form id="authForm" novalidate>
+      <div class="collapse" id="usernameWrap" inert>
+        <div>
+          <label for="username">Username</label>
+          <input id="username" type="text" autocomplete="username" maxlength="40">
+        </div>
+      </div>
+
+      <label for="email">Email</label>
+      <input id="email" type="email" autocomplete="email" maxlength="100">
+
+      <label for="password">Password</label>
+      <input id="password" type="password" autocomplete="current-password" maxlength="100">
+
+      <button class="submit" id="submitBtn" type="submit">Log in</button>
+    </form>
+    <div id="msg" role="status"></div>
+
+    <p class="switch" id="switchText">Don’t have an account? <button type="button">Sign up</button></p>
+    <a class="back" href="index.html">Back to website</a>
+  </main>
+</div>
+
+<script>
+(function () {
+  // On localhost the page talks to the same server. After deploying,
+  // replace YOUR-BACKEND-URL with your live backend address.
+  var API = (location.hostname === 'localhost' || location.hostname === '127.0.0.1') ? '' : 'https://YOUR-BACKEND-URL';
+  var $ = function (id) { return document.getElementById(id); };
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- red ember particles ---------- */
+  var cv = $('fx'), ctx = cv.getContext('2d');
+  var W = 0, H = 0, dpr = 1, P = [], B = [], mouse = { x: -9999, y: -9999 };
+  var energy = 0, last = 0, running = true;
+  var tilt = $('tilt'), tx = 0, ty = 0, cx = 0, cy = 0;
+
+  var sprite = document.createElement('canvas');
+  sprite.width = sprite.height = 64;
+  (function () {
+    var g = sprite.getContext('2d'), gr = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+    gr.addColorStop(0, 'rgba(255,90,90,1)');
+    gr.addColorStop(0.25, 'rgba(240,30,40,.85)');
+    gr.addColorStop(0.6, 'rgba(190,8,16,.25)');
+    gr.addColorStop(1, 'rgba(120,0,8,0)');
+    g.fillStyle = gr; g.fillRect(0, 0, 64, 64);
+  })();
+
+  function rand(a, b) { return a + Math.random() * (b - a); }
+
+  function spawn(anywhere) {
+    var p = { x: rand(0, W), y: anywhere ? rand(0, H) : H + rand(10, 40),
+      bx: rand(-0.18, 0.18), by: rand(-0.65, -0.15),
+      r: rand(0.8, 2.6), a: rand(0.3, 0.9), ph: rand(0, 6.28), tw: rand(0.8, 2.2) };
+    p.vx = p.bx; p.vy = p.by;
+    return p;
+  }
+
+  function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth; H = window.innerHeight;
+    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    var n = Math.round(Math.min(110, Math.max(36, W * H / 15000)));
+    if (reduce) n = Math.round(n / 2);
+    while (P.length < n) P.push(spawn(true));
+    P.length = Math.min(P.length, n);
+    if (reduce) draw(0);
+  }
+
+  function pulse(n) { energy = Math.min(energy + n, 1.6); }
+
+  function burst(x, y, n, power) {
+    for (var i = 0; i < n && B.length < 260; i++) {
+      var a = rand(0, 6.283), v = rand(0.6, 1) * (power || 3);
+      B.push({ x: x, y: y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, r: rand(0.8, 2.2), life: rand(0.7, 1.2) });
+    }
+  }
+
+  function draw(t) {
+    var i, j, p, q, dx, dy, d2, a;
+    ctx.clearRect(0, 0, W, H);
+    ctx.globalCompositeOperation = 'lighter';
+    if (mouse.x > -999) { ctx.globalAlpha = 0.28; ctx.drawImage(sprite, mouse.x - 170, mouse.y - 170, 340, 340); }
+    ctx.lineWidth = 1;
+    for (i = 0; i < P.length; i++) {
+      p = P[i];
+      for (j = i + 1; j < P.length; j++) {
+        q = P[j]; dx = p.x - q.x; dy = p.y - q.y; d2 = dx * dx + dy * dy;
+        if (d2 < 12100) {
+          a = (1 - Math.sqrt(d2) / 110) * 0.22;
+          ctx.globalAlpha = 1; ctx.strokeStyle = 'rgba(243,38,50,' + a.toFixed(3) + ')';
+          ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(q.x, q.y); ctx.stroke();
+        }
+      }
+      dx = p.x - mouse.x; dy = p.y - mouse.y; d2 = dx * dx + dy * dy;
+      if (d2 < 22500) {
+        a = (1 - Math.sqrt(d2) / 150) * 0.45;
+        ctx.globalAlpha = 1; ctx.strokeStyle = 'rgba(255,70,70,' + a.toFixed(3) + ')';
+        ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(mouse.x, mouse.y); ctx.stroke();
+      }
+    }
+    for (i = 0; i < P.length; i++) {
+      p = P[i];
+      var s = p.r * 7;
+      ctx.globalAlpha = p.a * (0.65 + 0.35 * Math.sin(t * p.tw + p.ph));
+      ctx.drawImage(sprite, p.x - s / 2, p.y - s / 2, s, s);
+    }
+    for (i = 0; i < B.length; i++) {
+      q = B[i]; s = q.r * 8;
+      ctx.globalAlpha = Math.max(0, q.life) * 0.95;
+      ctx.drawImage(sprite, q.x - s / 2, q.y - s / 2, s, s);
+    }
+    ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
+  }
+
+  function frame(now) {
+    if (!running) return;
+    var dt = Math.min(33, now - (last || now)) / 16.67, i, p, b;
+    last = now;
+    energy *= Math.pow(0.965, dt);
+    var speed = 1 + energy * 2.2;
+    for (i = 0; i < P.length; i++) {
+      p = P[i];
+      var dx = p.x - mouse.x, dy = p.y - mouse.y, d2 = dx * dx + dy * dy;
+      if (d2 < 19600 && d2 > 1) {
+        var d = Math.sqrt(d2), f = (1 - d / 140) * 0.9 * dt;
+        p.vx += dx / d * f; p.vy += dy / d * f;
+      }
+      p.vx += (p.bx - p.vx) * 0.02 * dt; p.vy += (p.by - p.vy) * 0.02 * dt;
+      p.x += p.vx * speed * dt; p.y += p.vy * speed * dt;
+      if (p.y < -20 || p.x < -20 || p.x > W + 20) { P[i] = spawn(false); }
+    }
+    for (i = B.length - 1; i >= 0; i--) {
+      b = B[i];
+      b.x += b.vx * dt; b.y += b.vy * dt;
+      b.vx *= Math.pow(0.97, dt); b.vy = b.vy * Math.pow(0.97, dt) - 0.01 * dt;
+      b.life -= dt * 0.02;
+      if (b.life <= 0) B.splice(i, 1);
+    }
+    if (!reduce) {
+      cx += (tx - cx) * 0.08 * dt; cy += (ty - cy) * 0.08 * dt;
+      tilt.style.transform = 'perspective(900px) rotateY(' + (cx * 6).toFixed(2) + 'deg) rotateX(' + (-cy * 6).toFixed(2) + 'deg)';
+    }
+    draw(now / 1000);
+    requestAnimationFrame(frame);
+  }
+
+  window.addEventListener('pointermove', function (e) {
+    mouse.x = e.clientX; mouse.y = e.clientY;
+    if (e.pointerType !== 'touch') { tx = e.clientX / W - 0.5; ty = e.clientY / H - 0.5; }
+    if (Math.random() < 0.12) burst(e.clientX, e.clientY, 1, 0.5);
+  });
+  window.addEventListener('pointerdown', function (e) { burst(e.clientX, e.clientY, 14, 3.2); pulse(0.25); });
+  window.addEventListener('pointerup', function (e) { if (e.pointerType === 'touch') mouse.x = -9999; });
+  document.documentElement.addEventListener('mouseleave', function () { mouse.x = -9999; });
+  window.addEventListener('resize', resize);
+  document.addEventListener('visibilitychange', function () {
+    running = !document.hidden;
+    if (running && !reduce) { last = 0; requestAnimationFrame(frame); }
+  });
+  resize();
+  if (!reduce) requestAnimationFrame(frame);
+
+  /* ---------- card spotlight ---------- */
+  var card = $('card');
+  card.addEventListener('pointermove', function (e) {
+    var r = card.getBoundingClientRect();
+    card.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+    card.style.setProperty('--my', (e.clientY - r.top) + 'px');
+  });
+
+  function animate(el, frames, opts) {
+    if (!reduce && el.animate) return el.animate(frames, opts);
+  }
+  function center() {
+    var r = card.getBoundingClientRect();
+    return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+  }
+
+  /* ---------- login / sign up ---------- */
+  var mode = 'login';
+
+  function show(text, ok) {
+    $('msg').textContent = text;
+    $('msg').className = ok ? 'ok' : 'err';
+  }
+
+  function fail(text) {
+    show(text, false);
+    animate(card, [{ transform: 'translateX(0)' }, { transform: 'translateX(-9px)' }, { transform: 'translateX(8px)' },
+      { transform: 'translateX(-5px)' }, { transform: 'translateX(0)' }], { duration: 450 });
+    var c = center(); burst(c.x, c.y, 26, 2.4); pulse(0.9);
+  }
+
+  function setMode(next) {
+    mode = next;
+    var s = mode === 'signup';
+    $('usernameWrap').classList.toggle('open', s);
+    $('usernameWrap').inert = !s;
+    $('title').textContent = s ? 'Create account' : 'Log in';
+    $('sub').textContent = s ? 'Join Kryveil Studios. It only takes a moment.' : 'Welcome back. Enter your details to continue.';
+    $('submitBtn').textContent = s ? 'Sign up' : 'Log in';
+    $('password').setAttribute('autocomplete', s ? 'new-password' : 'current-password');
+    $('switchText').innerHTML = s ? 'Already have an account? <button type="button">Log in</button>'
+                                  : 'Don’t have an account? <button type="button">Sign up</button>';
+    $('msg').textContent = '';
+    [$('title'), $('sub')].forEach(function (el) {
+      animate(el, [{ opacity: 0, transform: 'translateY(6px)' }, { opacity: 1, transform: 'none' }], { duration: 320 });
+    });
+    pulse(0.5);
+  }
+
+  $('switchText').addEventListener('click', function (e) {
+    if (e.target.closest('button')) setMode(mode === 'login' ? 'signup' : 'login');
+  });
+
+  ['username', 'email', 'password'].forEach(function (id) {
+    $(id).addEventListener('focus', function () { pulse(0.35); });
+    $(id).addEventListener('input', function () { pulse(0.12); });
+  });
+
+  $('authForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var body = { email: $('email').value, password: $('password').value };
+    if (mode === 'signup') body.username = $('username').value;
+
+    $('submitBtn').disabled = true;
+    show('Please wait...', true);
+
+    fetch(API + '/api/' + mode, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    })
+      .then(function (res) {
+        return res.json().then(function (data) { return { ok: res.ok, data: data }; });
+      })
+      .then(function (r) {
+        if (!r.ok) return fail(r.data.error || 'Something went wrong. Please try again.');
+        var c = center();
+        if (mode === 'signup') {
+          show(r.data.message, true);
+          burst(c.x, c.y, 60, 3.6); pulse(1);
+          setTimeout(function () { setMode('login'); show('Account created. Please log in.', true); }, 1200);
+        } else {
+          try {
+            localStorage.setItem('kryveil_token', r.data.token);
+            localStorage.setItem('kryveil_user', r.data.username);
+          } catch (err) {}
+          show('Logged in. Redirecting...', true);
+          burst(c.x, c.y, 120, 5); pulse(1.6);
+          animate(card, [{ opacity: 1, transform: 'scale(1)' }, { opacity: 0, transform: 'scale(1.05)' }],
+            { duration: 800, delay: 150, easing: 'ease-in', fill: 'forwards' });
+          setTimeout(function () { location.href = 'index.html'; }, 1100);
+        }
+      })
+      .catch(function () { fail('Could not reach the server. Please try again later.'); })
+      .then(function () { $('submitBtn').disabled = false; });
+  });
+})();
+</script>
+</body>
+</html>
